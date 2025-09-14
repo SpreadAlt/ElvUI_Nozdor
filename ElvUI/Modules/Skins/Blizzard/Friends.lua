@@ -306,7 +306,7 @@ S:AddCallback("Skin_Friends", function()
 
 	GuildFrameTotals:Point("BOTTOM", GuildFrame, "LEFT", 82, -77)
 
-	GuildFrameGuildListToggleButton:Point("LEFT", 327, -89)
+	GuildFrameGuildListToggleButton:Point("LEFT", 305, -69)
 	GuildFrameGuildListToggleButton.SetPoint = E.noop
 
 	GuildFrameNotesLabel:Point("TOPLEFT", 19, -340)
@@ -635,10 +635,6 @@ S:AddCallback("Skin_Friends", function()
 	S:HandleButton(RaidFrameConvertToRaidButton)
 	S:HandleButton(RaidFrameRaidInfoButton)
 	S:HandleButton(RaidFrameNotInRaidRaidBrowserButton)
-	
-	RaidFrameNotInRaidRaidBrowserButton:ClearAllPoints()
-	RaidFrameNotInRaidRaidBrowserButton:Point("TOPLEFT", RaidFrameConvertToRaidButton, "BOTTOMLEFT", 0, -415)
-	RaidFrameNotInRaidRaidBrowserButton.SetPoint = E.noop
 
 	RaidFrameConvertToRaidButton:Point("TOPLEFT", 45, -33)
 	RaidFrameRaidInfoButton:Point("LEFT", RaidFrameConvertToRaidButton, "RIGHT", 69, 0)
@@ -669,7 +665,6 @@ S:AddCallback("Skin_Friends", function()
 
 	RaidInfoScrollFrameScrollBar:Point("TOPLEFT", RaidInfoScrollFrame, "TOPRIGHT", 4, -18)
 	RaidInfoScrollFrameScrollBar:Point("BOTTOMLEFT", RaidInfoScrollFrame, "BOTTOMRIGHT", 4, 17)
-	
 
 	for _, button in ipairs(RaidInfoScrollFrame.buttons) do
 		button.reset:Width(115)

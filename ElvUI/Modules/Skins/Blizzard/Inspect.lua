@@ -1,6 +1,5 @@
 local E, L, V, P, G = unpack(select(2, ...)) -- Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local S = E:GetModule("Skins")
-local TT = E:GetModule("Tooltip")
 
 --Lua functions
 local _G = _G
@@ -10,50 +9,9 @@ local GetInventoryItemID = GetInventoryItemID
 local GetItemInfo = GetItemInfo
 local GetItemQualityColor = GetItemQualityColor
 
-
 S:AddCallbackForAddon("Blizzard_InspectUI", "Skin_Blizzard_InspectUI", function()
 	if not E.private.skins.blizzard.enable or not E.private.skins.blizzard.inspect then return end
-	
-	local ilvlPlate = CreateFrame("Frame", nil, InspectPaperDollFrame)
-	ilvlPlate:SetTemplate("Transparent")
-	ilvlPlate:Size(80, 22)
-	ilvlPlate:Point("TOP", InspectModelFrame, "BOTTOM", 0, -6)
-	ilvlPlate:Hide()
-	
-	local ilvlText = InspectModelFrame:CreateFontString(nil, "OVERLAY")
-	ilvlText:FontTemplate(nil, 35, "OUTLINE")
-	ilvlText:SetPoint("TOP", InspectModelFrame, "TOP", 0, -270)
-	ilvlText:Hide()
-	
-	local function UpdateInspectILvl()
-		local unit = InspectFrame and InspectFrame.unit
-		if not unit or not UnitIsPlayer(unit) then
-			ilvlText:Hide()
-			return
-		end
-	
-		ilvlText:Show()
-	
-		if not UnitIsEnemy("player", unit) then
-			ItemLevelMixIn:Request(unit)
-		end
-	
-		ilvlText:SetText(TT:GetItemLvL(unit) or "")
-	end
-	
-	InspectPaperDollFrame:HookScript("OnShow", UpdateInspectILvl)
-	
-	local f = CreateFrame("Frame")
-	f:RegisterEvent("INSPECT_READY")
-	f:RegisterEvent("INSPECT_TALENT_READY")
-	f:RegisterEvent("UNIT_INVENTORY_CHANGED")
-	f:SetScript("OnEvent", function(_, event, arg1)
-		if event == "UNIT_INVENTORY_CHANGED" then
-			if not InspectFrame or arg1 ~= InspectFrame.unit then return end
-		end
-		UpdateInspectILvl()
-	end)
-	
+
 	InspectFrame:StripTextures(true)
 	InspectFrame:CreateBackdrop("Transparent")
 	InspectFrame.backdrop:Point("TOPLEFT", 11, -12)

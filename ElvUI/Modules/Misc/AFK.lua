@@ -28,7 +28,8 @@ local Screenshot = Screenshot
 local SetCVar = SetCVar
 local UnitCastingInfo = UnitCastingInfo
 local UnitIsAFK = UnitIsAFK
-
+local lastUpdate = 0
+local tipNum, oldTipNum = 0,0
 local AFK, DND = AFK, DND
 local CHAT_BN_CONVERSATION_GET_LINK = CHAT_BN_CONVERSATION_GET_LINK
 local MAX_WOW_CHAT_CHANNELS = MAX_WOW_CHAT_CHANNELS
@@ -44,6 +45,23 @@ local ignoreKeys = {
 local printKeys = {
 	["PRINTSCREEN"] = true,
 }
+
+
+local classIcons = {
+	["SHAMAN"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_shaman.blp",
+	["WARRIOR"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_warrior.blp",
+	["MAGE"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_mage.blp",
+	["ROGUE"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_rogue.blp",
+	["DRUID"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_druid.blp",
+	["HUNTER"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_hunter.blp",
+	["PRIEST"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_priest.blp",
+	["WARLOCK"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_warlock.blp",
+	["PALADIN"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_paladin.blp",
+	["DEATHKNIGHT"] = "Interface\\AddOns\\ElvUI\\Media\\Textures\\flat_dk.blp",
+	-- ["SHAMAN"] = "",
+}
+
+
 
 if E.isMacClient then
 	printKeys[_G["KEY_PRINTSCREEN_MAC"]] = true
@@ -75,7 +93,22 @@ local function OnAnimFinished(self)
 	end
 end
 
+local function UpdateTip(_,elapsed)
+	lastUpdate = lastUpdate + elapsed
+	-- print(lastUpdate)
+	if lastUpdate > 15 then
+		tipNum = random(1, #L["RandomWords"])
+
+		while tipNum == oldTipNum do
+			tipNum = random(1, #L["RandomWords"])
+		end
+		mod.AFKMode.UpdateFor:AddMessage(L["RandomWords"][tipNum], 1, 1, 1)
+		OldTip = tipNum
+		lastUpdate = 0
+	end
+end
 function mod:SetAFK(status)
+	self:UpdateFactionLogo()
 	if status and not self.isAFK then
 		if InspectFrame then
 			InspectFrame:Hide()
@@ -111,6 +144,11 @@ function mod:SetAFK(status)
 		self.AFKMode.bottom.model:SetScript("OnUpdate", UpdateAnimation)
 		self.AFKMode.bottom.model:SetScript("OnAnimFinished", OnAnimFinished)
 
+		tipNum = random(1, #L["RandomWords"])
+		mod.AFKMode.UpdateFor:AddMessage(L["RandomWords"][tipNum], 1, 1, 1)
+		-- mod.AFKMode.UpdateFor:AddMessage(#L["RandomWords"], 1, 1, 1)
+		mod.AFKMode.UpdateFor:SetScript("OnUpdate",UpdateTip)
+
 		self.isAFK = true
 	elseif not status and self.isAFK then
 		self.AFKMode:Hide()
@@ -128,7 +166,7 @@ function mod:SetAFK(status)
 		self.AFKMode.chat:UnregisterEvent("CHAT_MSG_BN_CONVERSATION")
 		self.AFKMode.chat:UnregisterEvent("CHAT_MSG_GUILD")
 		self.AFKMode.chat:Clear()
-
+		mod.AFKMode.UpdateFor:SetScript("OnUpdate",nil)
 		self.isAFK = false
 	end
 end
@@ -266,6 +304,8 @@ local function Chat_OnEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg
 	self:AddMessage(body, info.r, info.g, info.b, info.id, false, accessID, typeID)
 end
 
+
+
 function mod:Initialize()
 	self.AFKMode = CreateFrame("Frame", "ElvUIAFKFrame")
 	self.AFKMode:SetFrameLevel(1)
@@ -302,13 +342,21 @@ function mod:Initialize()
 
 	self.AFKMode.bottom.logo = self.AFKMode:CreateTexture(nil, "OVERLAY")
 	self.AFKMode.bottom.logo:Size(320, 150)
-	self.AFKMode.bottom.logo:Point("CENTER", self.AFKMode.bottom, "CENTER", 0, 50)
+	self.AFKMode.bottom.logo:Point("CENTER", self.AFKMode.bottom, "CENTER", 0, 105)
 	self.AFKMode.bottom.logo:SetTexture(E.Media.Textures.Logo)
 
+
+
+	self.AFKMode.bottom.ClassLogo = self.AFKMode:CreateTexture(nil, "OVERLAY")
+	self.AFKMode.bottom.ClassLogo:Size(128, 128)
+	self.AFKMode.bottom.ClassLogo:Point("RIGHT", self.AFKMode.bottom, "RIGHT", -10, 10)
+	self.AFKMode.bottom.ClassLogo:SetTexture(classIcons[select(2,UnitClass("player"))])
+
+
 	self.AFKMode.bottom.faction = self.AFKMode.bottom:CreateTexture(nil, "OVERLAY")
-	self.AFKMode.bottom.faction:Point("BOTTOMLEFT", -20, -16)
+	self.AFKMode.bottom.faction:Point("BOTTOMLEFT", -10, -10)
 	self.AFKMode.bottom.faction:SetTexture("Interface\\AddOns\\ElvUI\\media\\textures\\"..E.myfaction.."-Logo")
-	self.AFKMode.bottom.faction:Size(140)
+	self.AFKMode.bottom.faction:Size(140,140)
 
 	local classColor = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass]
 	self.AFKMode.bottom.name = self.AFKMode.bottom:CreateFontString(nil, "OVERLAY")
@@ -335,6 +383,20 @@ function mod:Initialize()
 	self.AFKMode.bottom.model:SetFacing(6)
 	self.AFKMode.bottom.model:SetUnit("player")
 
+
+	self.AFKMode.UpdateFor = CreateFrame('ScrollingMessageFrame', nil, self.AFKMode)
+
+	self.AFKMode.UpdateFor:SetHeight(10)
+	-- self.AFKMode.UpdateFor:SetFading(false)
+	-- self.AFKMode.UpdateFor:SetFadeDuration(0)
+	-- self.AFKMode.UpdateFor:SetTimeVisible(1)
+	self.AFKMode.UpdateFor:SetMaxLines(1)
+	-- self.AFKMode.UpdateFor:SetSpacing(2)
+	self.AFKMode.UpdateFor:SetWidth(self.AFKMode.bottom:GetWidth()/2+6)
+	self.AFKMode.UpdateFor:Point("BOTTOM", self.AFKMode.bottom, "CENTER", 0, -20)
+
+	self.AFKMode.UpdateFor:FontTemplate(nil, 20)
+
 	if E.db.general.afk then
 		self:Toggle()
 	end
@@ -342,6 +404,10 @@ function mod:Initialize()
 	self.Initialized = true
 end
 
+function mod:UpdateFactionLogo()
+	E.myfaction, E.myLocalizedFaction = UnitFactionGroup("player")
+	self.AFKMode.bottom.faction:SetTexture("Interface\\AddOns\\ElvUI\\media\\textures\\"..E.myfaction.."-Logo")
+end
 local function InitializeCallback()
 	mod:Initialize()
 end

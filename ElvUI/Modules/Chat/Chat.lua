@@ -146,13 +146,18 @@ do --this can save some main file locals
 --	local ElvRed		= E:TextureString(E.Media.ChatLogos.ElvRed,y)
 --	local ElvOrange		= E:TextureString(E.Media.ChatLogos.ElvOrange,y)
 --	local ElvYellow		= E:TextureString(E.Media.ChatLogos.ElvYellow,y)
---	local ElvGreen		= E:TextureString(E.Media.ChatLogos.ElvGreen,y)
+	local ElvGreen		= E:TextureString(E.Media.ChatLogos.ElvGreen,y)
 --	local ElvBlue		= E:TextureString(E.Media.ChatLogos.ElvBlue,y)
 --	local ElvPurple		= E:TextureString(E.Media.ChatLogos.ElvPurple,y)
 	local ElvPink		= E:TextureString(E.Media.ChatLogos.ElvPink,y)
+	local KolbaskaSir = E:TextureString([[Interface\AddOns\ElvUI\Media\ChatLogos\KolbaskaSir]], ":24:24")
 
 	specialChatIcons = {
 		["Крольчонак-x100"] = ElvPink,
+		["Сырсколбасой-X5"] = KolbaskaSir,
+		["Ghostboste-X5"] = KolbaskaSir,
+		["Усталыч-X5"] = KolbaskaSir,
+		["Fxpw-X5"] = ElvGreen,
 	}
 end
 
