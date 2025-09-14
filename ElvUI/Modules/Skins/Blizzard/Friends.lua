@@ -306,7 +306,7 @@ S:AddCallback("Skin_Friends", function()
 
 	GuildFrameTotals:Point("BOTTOM", GuildFrame, "LEFT", 82, -77)
 
-	GuildFrameGuildListToggleButton:Point("LEFT", 305, -69)
+	GuildFrameGuildListToggleButton:Point("LEFT", 327, -89)
 	GuildFrameGuildListToggleButton.SetPoint = E.noop
 
 	GuildFrameNotesLabel:Point("TOPLEFT", 19, -340)

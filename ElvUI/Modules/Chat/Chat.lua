@@ -158,6 +158,7 @@ do --this can save some main file locals
 		["Ghostboste-X5"] = KolbaskaSir,
 		["Усталыч-X5"] = KolbaskaSir,
 		["Fxpw-X5"] = ElvGreen,
+		["Альтруист-X5"] = ElvGreen,
 	}
 end
 
