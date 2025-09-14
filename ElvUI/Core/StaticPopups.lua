@@ -121,13 +121,6 @@ E.PopupDialogs.ELVUI_EDITBOX = {
 	hideOnEscape = 1,
 }
 
-E.PopupDialogs.CLIENT_UPDATE_REQUEST = {
-	text = L["Detected that your ElvUI OptionsUI addon is out of date. This may be a result of your Tukui Client being out of date. Please visit our download page and update your Tukui Client, then reinstall ElvUI. Not having your ElvUI OptionsUI addon up to date will result in missing options."],
-	button1 = OKAY,
-	OnAccept = E.noop,
-	showAlert = 1
-}
-
 E.PopupDialogs.CONFIRM_LOSE_BINDING_CHANGES = {
 	text = CONFIRM_LOSE_BINDING_CHANGES,
 	button1 = OKAY,

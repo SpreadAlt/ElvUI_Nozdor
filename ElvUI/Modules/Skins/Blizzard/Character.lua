@@ -295,25 +295,9 @@ end
 			if not slotFrame then return end
 			local q = GetInventoryItemQuality("player", slotId)
 			local r,g,b = qualityColor(q)
-			if slotFrame.SetBackdropBorderColor then
-				slotFrame:SetBackdropBorderColor(r, g, b)
-			end
-			local cur, max = GetInventoryItemDurability(slotId)
-			if not slotFrame.__dur then
-				local fs = slotFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-				fs:SetPoint("BOTTOM", 0, 1)
-				fs:SetJustifyH("CENTER")
-				slotFrame.__dur = fs
-			end
-			if cur and max and max > 0 then
-				local pct = floor(cur / max * 100 + 0.5)
-				local cr,cg,cb = 0,1,0
-				if pct < 25 then cr,cg,cb = 1,0,0 elseif pct < 60 then cr,cg,cb = 1,0.8,0 end
-				slotFrame.__dur:SetText(pct)
-				slotFrame.__dur:SetTextColor(cr,cg,cb)
-				slotFrame.__dur:Show()
-			else
-				slotFrame.__dur:Hide()
+			local borderHost = slotFrame.backdrop or slotFrame
+			if borderHost.SetBackdropBorderColor then
+				borderHost:SetBackdropBorderColor(r, g, b)
 			end
 		end
 		local slotIds = {
