@@ -8,6 +8,10 @@ local unpack = unpack
 local GetInventoryItemID = GetInventoryItemID
 local GetItemInfo = GetItemInfo
 local GetItemQualityColor = GetItemQualityColor
+local GetInventoryItemLink = GetInventoryItemLink
+local CreateFrame = CreateFrame
+local floor = math.floor
+local min, max = math.min, math.max
 
 S:AddCallbackForAddon("Blizzard_InspectUI", "Skin_Blizzard_InspectUI", function()
 	if not E.private.skins.blizzard.enable or not E.private.skins.blizzard.inspect then return end
@@ -187,4 +191,87 @@ S:AddCallbackForAddon("Blizzard_InspectUI", "Skin_Blizzard_InspectUI", function(
 	S:HandleScrollBar(InspectTalentFrameScrollFrameScrollBar)
 	InspectTalentFrameScrollFrameScrollBar:Point("TOPLEFT", InspectTalentFrameScrollFrame, "TOPRIGHT", 8, -18)
 	InspectTalentFrameScrollFrameScrollBar:Point("BOTTOMLEFT", InspectTalentFrameScrollFrame, "BOTTOMRIGHT", 8, 15)
+
+	local InspectILvl = InspectPaperDollFrame:CreateFontString(nil, "OVERLAY")
+	InspectILvl:FontTemplate(E.LSM:Fetch("font", E.db.general.font), 21, "OUTLINE")
+
+	InspectILvl:Point("TOPLEFT", InspectModelFrame, "BOTTOMLEFT", 100, 50)
+	InspectILvl:SetText("—")
+
+		local INSPECT_SLOT_IDS = {
+		1,  -- Head
+		2,  -- Neck
+		3,  -- Shoulder
+		15, -- Back
+		5,  -- Chest
+		9,  -- Wrist
+		10, -- Hands
+		6,  -- Waist
+		7,  -- Legs
+		8,  -- Feet
+		11, -- Finger 1
+		12, -- Finger 2
+		13, -- Trinket 1
+		14, -- Trinket 2
+		16, -- Main Hand
+		17, -- Off Hand
+		18, -- Ranged (WotLK)
+	}
+
+	local function ColorByILvl(ilvl)
+		if ilvl <= 190 then
+			return GetItemQualityColor(2)
+		elseif ilvl <= 200 then
+			return GetItemQualityColor(3)
+		else
+			return GetItemQualityColor(4)
+		end
+	end
+
+	local function UpdateInspectAverage()
+		if not InspectFrame or not InspectFrame.unit or not InspectFrame:IsShown() then return end
+		local unit = InspectFrame.unit
+
+		local total, count, needsRetry = 0, 0, false
+
+		for _, slotID in ipairs(INSPECT_SLOT_IDS) do
+			local link = GetInventoryItemLink(unit, slotID)
+			if link then
+				local _, _, _, ilvl = GetItemInfo(link)
+				if not ilvl then
+					needsRetry = true
+				elseif ilvl > 0 then
+					total = total + ilvl
+					count = count + 1
+				end
+			end
+		end
+
+		if needsRetry then
+			E:Delay(0.1, UpdateInspectAverage)
+			return
+		end
+
+		if count > 0 then
+			local avg = total / count
+			local rounded = floor(avg + 0.5)
+			local r, g, b = ColorByILvl(rounded)
+			InspectILvl:SetFormattedText("%d", rounded)
+			InspectILvl:SetTextColor(r, g, b)
+		else
+			InspectILvl:SetText("—")
+			InspectILvl:SetTextColor(1, 1, 1)
+		end
+	end
+
+	InspectFrame:HookScript("OnShow", UpdateInspectAverage)
+	hooksecurefunc("InspectPaperDollItemSlotButton_Update", function()
+		if InspectFrame:IsShown() then UpdateInspectAverage() end
+	end)
+
+	local InspectILvlEvent = CreateFrame("Frame")
+	InspectILvlEvent:RegisterEvent("INSPECT_READY")
+	InspectILvlEvent:SetScript("OnEvent", function(_, event, guid)
+		if InspectFrame:IsShown() then UpdateInspectAverage() end
+	end)
 end)

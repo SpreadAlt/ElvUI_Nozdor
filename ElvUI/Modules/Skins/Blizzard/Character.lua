@@ -156,18 +156,6 @@ end
 		_G.CharacterAttributesFrame:StripTextures()
 	end
 
-	if _G.GearManagerToggleButton then
-		_G.GearManagerToggleButton:Size(25, 29)
-		_G.GearManagerToggleButton:Point("TOPRIGHT", -46, -40)
-		_G.GearManagerToggleButton:CreateBackdrop("Default")
-		local n = _G.GearManagerToggleButton:GetNormalTexture()
-		if n then n:SetTexCoord(0.203125, 0.828125, 0.15625, 0.875) end
-		local p = _G.GearManagerToggleButton:GetPushedTexture()
-		if p then p:SetTexCoord(0.1875, 0.8125, 0.1875, 0.90625) end
-		local h = _G.GearManagerToggleButton:GetHighlightTexture()
-		if h then h:SetTexture(1, 1, 1, 0.3); h:SetAllPoints() end
-	end
-
 	if _G.PaperDollFrame then
 		local slots = {
 			[1] = _G.CharacterHeadSlot,[2] = _G.CharacterNeckSlot,[3] = _G.CharacterShoulderSlot,[4] = _G.CharacterShirtSlot,
@@ -183,6 +171,7 @@ end
 				slotFrame:StripTextures()
 				if slotFrame.StyleButton then slotFrame:StyleButton(false) end
 				if slotFrame.SetTemplate then slotFrame:SetTemplate("Default", true, true) end
+                if slotFrame.backdrop and slotFrame.GetFrameLevel then slotFrame.backdrop:SetFrameLevel(slotFrame:GetFrameLevel() + 1) end
 				if icon then
 					if icon.SetInside then icon:SetInside() end
 					icon:SetTexCoord(unpack(E.TexCoords))
@@ -310,19 +299,30 @@ end
 			local f = _G["Character"..name]
 			if f then frames[id] = f end
 		end
+
+        local function updateAllOnce()
+            for id,frame in pairs(frames) do
+                updateSlot(frame, id)
+            end
+        end 
+
 		local function updateAll()
-			for id,frame in pairs(frames) do
-				updateSlot(frame, id)
+            updateAllOnce()
+			if C_Timer and C_Timer.After then
+				C_Timer.After(0.10, updateAllOnce)
+                C_Timer.After(0.25, updateAllOnce)
 			end
 		end
 		local f = CreateFrame("Frame")
 		f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 		f:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 		f:RegisterEvent("PLAYER_ENTERING_WORLD")
-		f:SetScript("OnEvent", updateAll)
-		updateAll()
-		_G.EUI_UpdateAllSlots = updateAll
+		f:SetScript("OnEvent", function(_, evt, arg1)
+            if evt == "UNIT_INVENTORY_CHANGED" and arg1 ~= "player" then return end
+		    updateAll()
+        end)
 	end
+        _G.EUI_UpdateAllSlots = updateAll
 
 	do
 		local stats = _G.CharacterAttributesFrame
@@ -775,15 +775,15 @@ local function StyleNormal(row)
     icon:SetVertexColor(1,1,1)
     icon:SetAlpha(1)
     icon:SetTexCoord(.08,.92,.08,.92)
-    icon:SetDrawLayer("ARTWORK", 1)   -- иконка выше рамки
+    icon:SetDrawLayer("ARTWORK", 1)
 
     if not icon.backdrop then
         local b = CreateFrame("Frame", nil, row, BACKDROP_TPL)
         b:SetPoint("TOPLEFT",  icon, -1,  1)
         b:SetPoint("BOTTOMRIGHT", icon,  1, -1)
-        b:SetFrameLevel((row:GetFrameLevel() or 2) - 1)  -- ниже иконки
+        b:SetFrameLevel((row:GetFrameLevel() or 2) - 1)
         b:SetBackdrop({ edgeFile = "Interface/Buttons/WHITE8x8", edgeSize = 1 })
-        b:SetBackdropBorderColor(0,0,0,1)  -- только рамка, без фона
+        b:SetBackdropBorderColor(0,0,0,1)
         icon.backdrop = b
     else
         icon.backdrop:SetFrameLevel((row:GetFrameLevel() or 2) - 1)
@@ -880,4 +880,3 @@ if hooksecurefunc then
 end
 
 S:AddCallback("Skin_Character", LoadSkin)
-

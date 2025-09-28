@@ -306,6 +306,42 @@ function S:HandleStatusBar(frame, color)
 	E:RegisterStatusBar(frame)
 end
 
+function S:HandleMaxMinFrame(frame)
+	if frame.isSkinned then return end
+	assert(frame, "does not exist.")
+
+	frame:StripTextures(true)
+
+	for name, direction in pairs ({["MaximizeButton"] = "up", ["MinimizeButton"] = "down"}) do
+		local button = frame[name]
+
+		if button then
+			button:Size(26, 26)
+			button:ClearAllPoints()
+			button:Point("CENTER")
+			button:GetHighlightTexture():Kill()
+
+			button:SetScript("OnEnter", function(self)
+				self:GetNormalTexture():SetVertexColor(unpack(E.media.rgbvaluecolor))
+				self:GetPushedTexture():SetVertexColor(unpack(E.media.rgbvaluecolor))
+			end)
+
+			button:SetScript("OnLeave", function(self)
+				self:GetNormalTexture():SetVertexColor(1, 1, 1)
+				self:GetPushedTexture():SetVertexColor(1, 1, 1)
+			end)
+
+			button:SetNormalTexture(E.Media.Textures.ArrowUp)
+			button:GetNormalTexture():SetRotation(S.ArrowRotation[direction])
+
+			button:SetPushedTexture(E.Media.Textures.ArrowUp)
+			button:GetPushedTexture():SetRotation(S.ArrowRotation[direction])
+		end
+	end
+
+	frame.isSkinned = true
+end
+
 function S:HandleCheckBox(frame, noBackdrop, noReplaceTextures, forceSaturation)
 	if frame.isSkinned then return end
 
